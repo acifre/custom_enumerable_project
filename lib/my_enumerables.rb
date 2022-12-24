@@ -38,16 +38,11 @@ module Enumerable
   end
 
   def my_all?
-    is_all = false
     if block_given?
-      count = 0
-      i = 0
-      until i == self.length do
-        count += 1 if yield (self[i])
-        i += 1
-      end
+      is_all = true
 
-      is_all = true if count == self.length
+      my_each { |i| is_all = false if yield(i) == false}
+
       is_all
     else
       self
@@ -55,16 +50,9 @@ module Enumerable
   end
 
   def my_any?
-    is_any = false
     if block_given?
-      count = 0
-      i = 0
-      until i == self.length do
-        count += 1 if yield (self[i])
-        i += 1
-      end
-
-      is_any = true if count > 0
+      is_any = false
+      my_each { |i| is_any = true if yield(i) } #shorthand for condition true
       is_any
     else
       self
@@ -72,17 +60,11 @@ module Enumerable
   end
 
   def my_none?
-    none = false
-    if block_given?
-      count = 0
-      i = 0
-      until i == self.length do
-        count += 1 if yield (self[i])
-        i += 1
-      end
 
-      none = true if count == 0
-      none
+    if block_given?
+      is_none = true
+      my_each { |i| is_none = false if yield(i) }
+      is_none
     else
       self
     end
@@ -91,11 +73,7 @@ module Enumerable
   def my_count
     if block_given?
       count = 0
-      i = 0
-      until i == self.length do
-        count += 1 if yield(self[i])
-        i += 1
-      end
+      my_each { |i| count += 1 if yield(i) }
       count
     else
       self.length
@@ -105,11 +83,7 @@ module Enumerable
   def my_map
     if block_given?
       mapped_array = []
-      i = 0
-      until i == self.length do
-        mapped_array << yield(self[i])
-        i += 1
-      end
+      my_each { |i| mapped_array << yield(i)}
       mapped_array
     else
       self
@@ -118,9 +92,8 @@ module Enumerable
   end
 
   def my_inject(initial=0)
-
-    injected = initial
     if block_given?
+      injected = initial
       i = 0
       until i == self.length do
         injected = yield(injected, self[i])
